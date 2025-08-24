@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cashier PLU Trainer</title>
+    <style>
+      :root {
+        --bg: #0b0e14;
+        --panel: #11161f;
+        --muted: #a0aec0;
+        --text: #e6eaf2;
+        --accent: #6ee7b7;
+        --accent2: #7aa2f7;
+        --danger: #f87171;
+        --card: #0f1420;
+        --br: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, var(--bg), #0d1220), var(--bg);
+        color: var(--text);
+        font: 16px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      }
+      a.btn-primary {
+        display: inline-block;
+        background: linear-gradient(180deg, #7aa2f7, #4c76e5);
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: transform 0.05s ease, box-shadow 0.2s ease;
+      }
+      a.btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
+      }
+
+      .card > .img {
+        height: 160px; /* fixed area reserved for image */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0b1120;
+        border-bottom: 1px solid #1f2636;
+      }
+
+      .card > .img img {
+        width: 120px; /* small square thumbnail */
+        height: 120px;
+        object-fit: cover; /* crop nicely inside the square */
+        border-radius: 12px; /* rounded corners, optional */
+        display: block;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(15, 20, 32, 0.85);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid #1f2636;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 12px;
+        align-items: center;
+      }
+      .brand {
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+
+      /* Controls */
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      input[type="search"],
+      select,
+      button {
+        background: #0c1120;
+        border: 1px solid #273047;
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 10px;
+      }
+      input[type="search"] {
+        width: 100%;
+      }
+      button {
+        cursor: pointer;
+      }
+      .btn {
+        transition: transform 0.05s ease, box-shadow 0.2s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn-primary {
+        background: linear-gradient(180deg, var(--accent2), #4c76e5);
+        border: 0;
+        color: white;
+      }
+      .btn-ghost {
+        background: #0c112000;
+        border: 1px solid #273047;
+      }
+      .btn-danger {
+        background: linear-gradient(180deg, #fca5a5, #f87171);
+        border: 0;
+        color: #2b0d10;
+      }
+
+      /* Main grid */
+      main {
+        padding: 20px 16px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: linear-gradient(180deg, #0f1420, #0d1422);
+        border: 1px solid #1f2636;
+        border-radius: var(--br);
+        overflow: hidden;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      }
+      .card > .img {
+        height: 120px;
+        background: #0b1120;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #1f2636;
+      }
+      .card > .img span {
+        opacity: 0.6;
+      }
+      .card .meta {
+        padding: 12px 14px;
+        display: grid;
+        gap: 6px;
+      }
+      .code {
+        font: 700 18px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          monospace;
+        color: var(--accent);
+      }
+      .name {
+        font-weight: 600;
+      }
+      .cat {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 2px;
+      }
+      .badge {
+        font-size: 12px;
+        border: 1px solid #273047;
+        border-radius: 999px;
+        padding: 4px 8px;
+        color: #cbd5e1;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .spacer {
+        flex: 1;
+      }
+
+      /* Quiz panel */
+      dialog {
+        border: 1px solid #273047;
+        border-radius: 14px;
+        padding: 0;
+        background: #0f1420;
+        color: var(--text);
+        max-width: 520px;
+        width: 92%;
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .dlg-head {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1f2636;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .dlg-body {
+        padding: 16px;
+      }
+      .kbd {
+        font: 600 12px ui-monospace, monospace;
+        color: #a3bffa;
+        border: 1px solid #273047;
+        background: #0b1120;
+        border-radius: 6px;
+        padding: 2px 6px;
+      }
+
+      .footer {
+        padding: 16px;
+        color: #94a3b8;
+        text-align: center;
+        border-top: 1px solid #1f2636;
+      }
+      .hint {
+        color: #a1a9b7;
+        font-size: 13px;
+      }
+      .toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      @media (min-width: 900px) {
+        .toolbar {
+          grid-template-columns: 220px 1fr auto;
+        }
+        input[type="search"] {
+          max-width: 560px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap toolbar">
+        <div class="brand">🧮 Cashier PLU Trainer</div>
+        <div class="controls row">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Search by name, code, or category (press / to focus)"
+          />
+          <select id="categoryFilter">
+            <option value="">All categories</option>
+          </select>
+          <select id="sortBy">
+            <option value="name">Sort: Name</option>
+            <option value="code">Sort: Code</option>
+            <option value="category">Sort: Category</option>
+          </select>
+          <a href="addproduct.html" class="btn-primary">Add</a>
+        </div>
+        <div class="row">
+          <label class="toggle"
+            ><input id="hideCodes" type="checkbox" /> Hide codes</label
+          >
+          <button id="btnShuffle" class="btn btn-ghost">Shuffle</button>
+          <button id="btnQuiz" class="btn btn-primary">Start Quiz</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <div id="grid" class="grid"></div>
+        <p class="hint">
+          Tip: Press <span class="kbd">/</span> to search,
+          <span class="kbd">Q</span> to open Quiz, <span class="kbd">H</span> to
+          hide/show codes.
+        </p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      Made for fast PLU recall. Data is local to your browser (JSON). You can
+      export/import later.
+    </footer>
+
+    <!-- Quiz Dialog -->
+    <dialog id="quizDlg">
+      <div class="dlg-head">
+        <strong>Quiz Mode</strong><span class="spacer"></span
+        ><button id="closeQuiz" class="btn btn-ghost">Close</button>
+      </div>
+      <div class="dlg-body">
+        <p id="quizPrompt" style="margin: 0 0 10px 0"></p>
+        <div class="row" style="gap: 8px">
+          <input
+            id="quizInput"
+            inputmode="numeric"
+            maxlength="4"
+            placeholder="Enter 4-digit code"
+          />
+          <button id="submitQuiz" class="btn btn-primary">Submit</button>
+          <button id="skipQuiz" class="btn">Skip</button>
+        </div>
+        <p id="quizFeedback" class="hint"></p>
+        <p id="quizScore" class="hint"></p>
+        <button id="resetStats" class="btn btn-danger">Reset Stats</button>
+      </div>
+    </dialog>
+
+    <script>
+      // --- Sample Data (extend freely). You can also load from a products.json file later.
+      const PRODUCTS = [];
+      const CUSTOM_KEY = "pluCustomProducts";
+      function loadCustom() {
+        try {
+          return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      (function mergeCustom() {
+        const custom = loadCustom();
+        if (!Array.isArray(custom) || !custom.length) return;
+        const have = new Set(PRODUCTS.map((p) => p.code));
+        for (const p of custom) {
+          if (/^\d{4}$/.test(p.code) && !have.has(p.code)) {
+            PRODUCTS.push({
+              code: String(p.code),
+              name: String(p.name || "").trim(),
+              category: String(p.category || "").trim(),
+              image: p.image ? String(p.image) : undefined,
+              custom: true, // <--- mark as removable
+            });
+          }
+        }
+      })();
+      // --- State
+      let state = { q: "", category: "", sortBy: "name", hideCodes: false };
+
+      // Load preferences from localStorage (hideCodes, last sort)
+      const saved = JSON.parse(
+        localStorage.getItem("pluTrainerSettings") || "{}"
+      );
+      Object.assign(state, saved);
+
+      // --- DOM refs
+      const grid = document.getElementById("grid");
+      const searchInput = document.getElementById("searchInput");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const sortBy = document.getElementById("sortBy");
+      const hideCodes = document.getElementById("hideCodes");
+
+      // init controls
+      searchInput.value = state.q || "";
+      sortBy.value = state.sortBy;
+      hideCodes.checked = !!state.hideCodes;
+
+      // Populate categories
+      [...new Set(PRODUCTS.map((p) => p.category))].sort().forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        categoryFilter.appendChild(opt);
+      });
+      categoryFilter.value = state.category || "";
+
+      function saveSettings() {
+        localStorage.setItem(
+          "pluTrainerSettings",
+          JSON.stringify({
+            q: state.q,
+            category: state.category,
+            sortBy: state.sortBy,
+            hideCodes: state.hideCodes,
+          })
+        );
+      }
+
+      function render() {
+        // 1) Build filtered/sorted list
+        let list = [...PRODUCTS];
+        const q = (state.q || "").trim().toLowerCase();
+
+        if (q) {
+          list = list.filter(
+            (p) =>
+              p.name.toLowerCase().includes(q) ||
+              p.code.includes(q) ||
+              (p.category || "").toLowerCase().includes(q)
+          );
+        }
+        if (state.category) {
+          list = list.filter((p) => p.category === state.category);
+        }
+
+        list.sort((a, b) => {
+          const k = state.sortBy;
+          return String(a[k]).localeCompare(String(b[k]), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        });
+
+        // 2) Build card HTML (imgHTML is INSIDE the map — important!)
+        const html = list
+          .map((p) => {
+            const imgHTML = p.image
+              ? `<img src="${p.image}" alt="${p.name}" onerror="this.outerHTML='<span>🛒</span>'">`
+              : "<span>🛒</span>";
+
+            // Only show Remove if product has 'custom' flag
+            const removeBtn = p.custom
+              ? `<button class="btn btn-danger" data-remove="${p.code}">Remove</button>`
+              : "";
+
+            return `
+    <article class="card" data-code="${p.code}">
+      <div class="img">${imgHTML}</div>
+      <div class="meta">
+        <div class="row">
+          <div class="name">${p.name}</div>
+          <span class="spacer"></span>
+          <div class="badge">${p.category}</div>
+        </div>
+        <div class="code" ${
+          state.hideCodes ? 'style="filter: blur(7px)"' : ""
+        }>${p.code}</div>
+        <div class="badges">
+          <span class="badge">Type: ${p.category}</span>
+          <span class="badge">Digits: 4</span>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost" data-copy="${p.code}">Copy code</button>
+          <button class="btn" data-quizone="${p.code}">Quiz this</button>
+          ${removeBtn}
+        </div>
+      </div>
+    </article>
+  `;
+          })
+          .join("");
+
+        // 3) Inject + wire actions
+        grid.innerHTML = html;
+
+        grid.querySelectorAll("[data-copy]").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            const code = e.currentTarget.getAttribute("data-copy");
+            try {
+              await navigator.clipboard.writeText(code);
+              e.currentTarget.textContent = "Copied!";
+              setTimeout(
+                () => (e.currentTarget.textContent = "Copy code"),
+                1000
+              );
+            } catch {}
+          });
+        });
+
+        grid.querySelectorAll("[data-quizone]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const code = e.currentTarget.getAttribute("data-quizone");
+            const item = PRODUCTS.find((p) => p.code === code);
+            startQuiz([item]);
+          });
+        });
+
+        grid.querySelectorAll("[data-remove]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const code = e.currentTarget.getAttribute("data-remove");
+            if (!confirm(`Remove product ${code}?`)) return;
+
+            // Load current custom list
+            const KEY = "pluCustomProducts";
+            const custom = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+            // Filter out this product
+            const updated = custom.filter((p) => p.code !== code);
+
+            // Save back
+            localStorage.setItem(KEY, JSON.stringify(updated));
+
+            // Remove from PRODUCTS too
+            const idx = PRODUCTS.findIndex((p) => p.code === code);
+            if (idx > -1) PRODUCTS.splice(idx, 1);
+
+            render(); // refresh the grid
+          });
+        });
+      }
+
+      // Event handlers
+      searchInput.addEventListener("input", () => {
+        state.q = searchInput.value;
+        saveSettings();
+        render();
+      });
+      categoryFilter.addEventListener("change", () => {
+        state.category = categoryFilter.value;
+        saveSettings();
+        render();
+      });
+      sortBy.addEventListener("change", () => {
+        state.sortBy = sortBy.value;
+        saveSettings();
+        render();
+      });
+      hideCodes.addEventListener("change", () => {
+        state.hideCodes = hideCodes.checked;
+        saveSettings();
+        render();
+      });
+      document.getElementById("btnShuffle").addEventListener("click", () => {
+        PRODUCTS.sort(() => Math.random() - 0.5);
+        render();
+      });
+
+      // Keyboard shortcuts
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "/") {
+          e.preventDefault();
+          searchInput.focus();
+        }
+        if (e.key.toLowerCase() === "q") {
+          e.preventDefault();
+          startQuiz();
+        }
+        if (e.key.toLowerCase() === "h") {
+          e.preventDefault();
+          hideCodes.checked = !hideCodes.checked;
+          state.hideCodes = hideCodes.checked;
+          saveSettings();
+          render();
+        }
+      });
+
+      // --- Quiz logic
+      const quizDlg = document.getElementById("quizDlg");
+      const quizPrompt = document.getElementById("quizPrompt");
+      const quizInput = document.getElementById("quizInput");
+      const quizFeedback = document.getElementById("quizFeedback");
+      const quizScore = document.getElementById("quizScore");
+
+      const stats = JSON.parse(localStorage.getItem("pluStats") || "{}"); // {code: {seen: n, correct: m}}
+
+      function pickList() {
+        // bias towards items with lower accuracy
+        const scored = PRODUCTS.map((p) => {
+          const s = stats[p.code] || { seen: 0, correct: 0 };
+          const acc = s.seen ? s.correct / s.seen : 0; // 0..1
+          const weight = 1 - acc; // lower accuracy -> higher weight
+          return { p, w: 0.3 + weight };
+        });
+        // roulette selection of 10
+        const out = [];
+        for (let i = 0; i < Math.min(10, scored.length); i++) {
+          out.push(roulette(scored));
+        }
+        return out.map((o) => o.p);
+      }
+      function roulette(list) {
+        const sum = list.reduce((a, b) => a + b.w, 0),
+          r = Math.random() * sum;
+        let acc = 0;
+        for (const it of list) {
+          acc += it.w;
+          if (acc >= r) return it;
+        }
+        return list[list.length - 1];
+      }
+
+      let quizItems = [],
+        idx = 0,
+        correct = 0;
+      function startQuiz(custom) {
+        quizItems = custom || pickList();
+        idx = 0;
+        correct = 0;
+        quizFeedback.textContent = "";
+        quizDlg.showModal();
+        nextQ();
+      }
+
+      function nextQ() {
+        if (idx >= quizItems.length) {
+          quizPrompt.textContent = `Done! Score: ${correct}/${quizItems.length}`;
+          quizInput.value = "";
+          quizInput.disabled = true;
+          document.getElementById("submitQuiz").disabled = true;
+          return;
+        }
+        const item = quizItems[idx];
+        quizPrompt.innerHTML = `<strong>What is the PLU for:</strong> ${item.name} <span class="badge">${item.category}</span>`;
+        quizInput.value = "";
+        quizInput.disabled = false;
+        document.getElementById("submitQuiz").disabled = false;
+        quizInput.focus();
+        quizScore.textContent = `Question ${idx + 1} of ${quizItems.length}`;
+        quizFeedback.textContent = "";
+      }
+
+      function submitQuiz() {
+        const item = quizItems[idx];
+        const ans = (quizInput.value || "").trim();
+        stats[item.code] = stats[item.code] || { seen: 0, correct: 0 };
+        stats[item.code].seen++;
+        if (ans === item.code) {
+          correct++;
+          stats[item.code].correct++;
+          quizFeedback.textContent = "✅ Correct";
+          quizFeedback.style.color = "#86efac";
+        } else {
+          quizFeedback.textContent = `❌ ${ans || "—"}  → Correct: ${
+            item.code
+          }`;
+          quizFeedback.style.color = "#fda4af";
+        }
+        localStorage.setItem("pluStats", JSON.stringify(stats));
+        idx++;
+        setTimeout(nextQ, 600);
+      }
+
+      document
+        .getElementById("btnQuiz")
+        .addEventListener("click", () => startQuiz());
+      document
+        .getElementById("submitQuiz")
+        .addEventListener("click", submitQuiz);
+      document.getElementById("skipQuiz").addEventListener("click", () => {
+        idx++;
+        nextQ();
+      });
+      document
+        .getElementById("closeQuiz")
+        .addEventListener("click", () => quizDlg.close());
+      document.getElementById("resetStats").addEventListener("click", () => {
+        localStorage.removeItem("pluStats");
+        alert("Stats cleared. Quiz weighting will reset.");
+      });
+
+      // Initial render
+      render();
+
+      // Optional: fetch external JSON instead of embedded data
+      // fetch('products.json').then(r=>r.json()).then(data=>{ PRODUCTS.length = 0; PRODUCTS.push(...data); render(); });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add Product — Cashier PLU Trainer</title>
+    <style>
+      :root {
+        --bg: #0b0e14;
+        --panel: #11161f;
+        --text: #e6eaf2;
+        --muted: #9aa4b2;
+        --accent: #7aa2f7;
+        --ok: #6ee7b7;
+        --err: #f87171;
+        --br: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 16px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #0b0e14, #0d1220);
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        background: rgba(15, 20, 32, 0.85);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid #1f2636;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+
+      form {
+        margin-top: 16px;
+        background: #0f1420;
+        border: 1px solid #1f2636;
+        border-radius: var(--br);
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+      label {
+        font-weight: 600;
+      }
+      input,
+      select,
+      button {
+        background: #0c1120;
+        border: 1px solid #273047;
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 10px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .btn-primary {
+        background: linear-gradient(180deg, var(--accent), #4c76e5);
+        border: 0;
+        color: white;
+        cursor: pointer;
+      }
+      .btn-ghost {
+        background: #0c112000;
+        border: 1px solid #273047;
+        cursor: pointer;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .msg {
+        padding: 10px 12px;
+        border-radius: 10px;
+        display: none;
+      }
+      .msg.ok {
+        display: block;
+        background: rgba(110, 231, 183, 0.1);
+        border: 1px solid #134e4a;
+        color: #bbf7d0;
+      }
+      .msg.err {
+        display: block;
+        background: rgba(248, 113, 113, 0.08);
+        border: 1px solid #7f1d1d;
+        color: #fecaca;
+      }
+
+      .preview {
+        margin-top: 10px;
+      }
+      .preview img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #273047;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div
+        class="wrap"
+        style="
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 20px;
+        "
+      >
+        <a
+          href="index.html"
+          class="btn-ghost"
+          style="text-decoration: none; padding: 8px 10px; border-radius: 10px"
+          >← Back</a
+        >
+        <h1>Add a Product</h1>
+        <span style="flex: 1"></span>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <p class="note">
+        Products added here are saved to your browser
+        (<strong>localStorage</strong>) and merged with the built-in list on the
+        homepage.
+      </p>
+
+      <form id="form">
+        <div class="row">
+          <div>
+            <label for="code">PLU Code (4 digits)</label>
+            <input
+              id="code"
+              name="code"
+              inputmode="numeric"
+              pattern="\d{4}"
+              maxlength="4"
+              placeholder="e.g. 4011"
+              required
+            />
+          </div>
+          <div>
+            <label for="name">Product Name</label>
+            <input
+              id="name"
+              name="name"
+              placeholder="e.g. Banana (yellow)"
+              required
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="image">Image (from picture folder)</label>
+            <input
+              id="imgField"
+              name="image"
+              type="text"
+              placeholder="e.g. picture/banana.jpg"
+            />
+
+            <input
+              id="image"
+              name="image"
+              placeholder="banana.jpg or https://..."
+            />
+            <div
+              id="imgPreviewWrap"
+              style="
+                margin-top: 8px;
+                width: 160px;
+                height: 120px;
+                border: 1px solid #273047;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #0c1120;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <span style="opacity: 0.6">No preview</span>
+            </div>
+          </div>
+          <div>
+            <label for="category">Category</label>
+            <input
+              id="category"
+              name="category"
+              list="catList"
+              placeholder="Fruit / Vegetable / Herbs ..."
+              required
+            />
+            <datalist id="catList">
+              <option>Fruit</option>
+              <option>Vegetable</option>
+              <option>Herbs</option>
+              <option>Bakery</option>
+              <option>Bulk</option>
+            </datalist>
+          </div>
+          <div>
+            <label for="notes">Notes (optional)</label>
+            <input
+              id="notes"
+              name="notes"
+              placeholder="e.g. Organic, Bunch, Large"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="image">Image (from picture folder)</label>
+          <input
+            id="imgField"
+            name="image"
+            type="text"
+            placeholder="e.g. pictures/banana.jpg"
+          />
+          <div class="preview" id="preview"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">Save Product</button>
+          <button class="btn-ghost" type="button" id="btnClear">Clear</button>
+          <span class="note">Tip: Duplicate codes are blocked.</span>
+        </div>
+        <div id="msg" class="msg"></div>
+      </form>
+
+      <section style="margin-top: 22px">
+        <details>
+          <summary>Manage custom products</summary>
+          <div
+            style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap"
+          >
+            <button id="exportBtn" class="btn-ghost" type="button">
+              Export JSON
+            </button>
+            <label
+              class="btn-ghost"
+              style="
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+              "
+            >
+              <input
+                id="importFile"
+                type="file"
+                accept="application/json"
+                style="display: none"
+              />Import JSON
+            </label>
+            <button id="clearAll" class="btn-ghost" type="button">
+              Clear All
+            </button>
+          </div>
+          <p class="note">
+            Export to backup or share; import to load a list from another
+            device.
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <script>
+      // Live preview for image input
+      const imageInput = document.getElementById("image");
+      const previewWrap = document.getElementById("imgPreviewWrap");
+
+      function setPreview(src) {
+        previewWrap.innerHTML = "";
+        if (!src) {
+          previewWrap.innerHTML = '<span style="opacity:.6">No preview</span>';
+          return;
+        }
+        const img = new Image();
+        img.onload = () => {
+          previewWrap.innerHTML = "";
+          previewWrap.appendChild(img);
+        };
+        img.onerror = () => {
+          previewWrap.innerHTML = '<span style="opacity:.6">Not found</span>';
+        };
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        previewWrap.appendChild(img);
+      }
+
+      imageInput.addEventListener("input", () => {
+        let v = imageInput.value.trim();
+        if (v && !/^https?:/i.test(v)) v = "picture/" + v;
+        setPreview(v);
+      });
+      const STORAGE_KEY = "pluCustomProducts";
+
+      function loadCustom() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      }
+      function saveCustom(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      }
+
+      const form = document.getElementById("form");
+      const msg = document.getElementById("msg");
+      const imgField = document.getElementById("imgField");
+      const preview = document.getElementById("preview");
+
+      imgField.addEventListener("input", () => {
+        const path = imgField.value.trim();
+        if (path) {
+          preview.innerHTML = `<img src="${path}" alt="preview"/>`;
+        } else {
+          preview.innerHTML = "";
+        }
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const code = document.getElementById("code").value.trim();
+        const name = document.getElementById("name").value.trim();
+        const category = document.getElementById("category").value.trim();
+        const notes = document.getElementById("notes").value.trim();
+
+        // ✅ Use ONE variable name for the image path
+        let imgPath = (document.getElementById("imgField")?.value || "").trim();
+        if (imgPath) {
+          imgPath = imgPath.replace(/\\/g, "/"); // Windows → web slashes
+          imgPath = imgPath.replace(/^\/+/, ""); // remove leading /
+          // collapse repeated picture/ prefixes
+          imgPath = imgPath.replace(/^(?:picture\/)+/, "picture/");
+          // if not http(s) and not already prefixed, add picture/
+          if (
+            !/^https?:\/\//i.test(imgPath) &&
+            !imgPath.startsWith("picture/")
+          ) {
+            imgPath = "picture/" + imgPath;
+          }
+        }
+
+        const list = loadCustom();
+        if (list.some((p) => p.code === code)) {
+          return show(
+            "This PLU code already exists in your custom list.",
+            true
+          );
+        }
+
+        list.push({
+          code,
+          name: notes ? `${name} (${notes})` : name,
+          category,
+          image: imgPath || undefined,
+        });
+
+        saveCustom(list);
+        show("Saved! Taking you back to the list…", false);
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 650);
+      });
+
+      document
+        .getElementById("btnClear")
+        .addEventListener("click", () => form.reset());
+
+      function show(text, isErr) {
+        msg.textContent = text;
+        msg.className = "msg " + (isErr ? "err" : "ok");
+      }
+
+      // Export / Import / Clear All
+      document.getElementById("exportBtn").addEventListener("click", () => {
+        const data = JSON.stringify(loadCustom(), null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "plu-custom-products.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("importFile").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const incoming = JSON.parse(ev.target.result || "[]");
+            if (!Array.isArray(incoming)) throw new Error("Invalid file");
+            const current = loadCustom();
+            const merged = mergeLists(current, incoming);
+            saveCustom(merged);
+            show(`Imported ${incoming.length} items (after de-dupe).`, false);
+          } catch (err) {
+            show("Invalid JSON file.", true);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("clearAll").addEventListener("click", () => {
+        if (confirm("Remove ALL custom products?")) {
+          localStorage.removeItem(STORAGE_KEY);
+          show("Cleared.", false);
+        }
+      });
+
+      function mergeLists(a, b) {
+        const map = new Map();
+        [...a, ...b].forEach((p) => {
+          if (/^\d{4}$/.test(p.code)) {
+            map.set(p.code, {
+              code: String(p.code),
+              name: String(p.name || "").trim(),
+              category: String(p.category || "").trim(),
+              image: p.image ? String(p.image) : undefined,
+            });
+          }
+        });
+        return [...map.values()].sort((x, y) => x.code.localeCompare(y.code));
+      }
+    </script>
+  </body>
+</html>
